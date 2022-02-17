@@ -1,0 +1,24 @@
+#app{
+    max-width: 1260px;
+    margin: 20px auto;
+}
+
+.result{
+    display: flex;
+    max-width: 1260px;
+        height: 100px;
+        flex-wrap:  wrap ;
+        justify-content: center;
+}
+
+.result h5{
+    text-align: center;
+}
+/* .result > canvas{
+    height: 101px !important;
+} */
+
+/* canvas{
+    max-width: 350px;
+    height: 150px;
+} */

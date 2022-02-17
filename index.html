@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="vue.js"></script>
+    <script src="script.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+
+    <div id="app" >
+        <textarea  style="width:98%"  cols="30" rows="10" v-model="message" placeholder="Paste your data"> </textarea>
+    <button @click="say">say</button>
+    <div class="result" style="position: relative; height:40vh; width:80vw" >
+        <div v-for="mois in resultMois">
+            <h5>{{mois }}</h5>
+            <canvas   :id="mois[0]" width="190" height="190"></canvas>
+        </div>
+    </div>
+    </div>
+    
+</body>
+<script  type="module">
+import Person from "./Person.js";
+var app = new Vue({
+  el: '#app', 
+    data: {
+        message: '',
+        array:null,
+        result:[],
+        // tableauMois  : [ 'janvier', 'février',  'octobre', 'novembre', 'décembre',"kljlkj","jhjk"],
+        tableauMois  : [ 'janvier', 'février', 'mars','avril','mai','juin', 'juillet', 'août','septembre', 'octobre', 'novembre', 'décembre' ],
+        NumberMonth:0,
+        resultMois:[],
+        // resultMois:[["novembre",0,0,2],["décembre",0,2,6],["janvier",0,0,2]],
+        mois:[]
+    },
+    methods: {
+        calculDate:function (){
+           var LastMonth= this.result[0].EndDate.split('/');
+           var FirstMonth= this.result[this.result.length -1].FirstResponseDate.split('/');
+           this.NumberMonth=parseInt(LastMonth[1],10)- parseInt(FirstMonth[1],10)  ;
+           
+           if(this.NumberMonth<0){ 
+            this.NumberMonth=parseInt(LastMonth[1],10)  +(13-parseInt(FirstMonth[1],10)) ;
+            }
+            var nb=this.NumberMonth; var i=0; var adaptee=0;var intense=0; var charge=0;
+            while (nb>0) {
+                var index= parseInt(FirstMonth[1],10)-1 +i;
+                if(index>11) { index-=12}
+                var month =this.tableauMois[index];
+                // console.log(index+1 +"indeeex");
+                this.result.forEach(element => {
+                          var item=element.FirstResponseDate.split('/');
+                            if(('0' +parseInt(item[1],10)).slice(-2) ==index+1){
+                                console.log(element.Answer);
+                                    if(element.Answer=="Ma charge est adaptée")
+                                        adaptee++;
+                                    else if (element.Answer=="Ma charge est intense")
+                                        intense++;
+                                    else if (element.Answer=="Je suis en sous-charge de travail")
+                                        charge++;
+                            }
+                });
+                this.resultMois.push( [month,charge,intense,adaptee]);
+                adaptee=0; charge=0; intense=0;
+                nb--; i++;
+            }
+        //    this.drowChart();
+         
+        },
+        chart: function(id){
+              new Chart(document.getElementById(id[0]), {
+            type: 'doughnut',
+            data: {
+            labels: ["Sur-charge", "Adaptée", "intense"],
+            datasets: [{
+                label: "Population (millions)",
+                backgroundColor: ['#FF4500',  '#00fa9ab2' , '#FFDC00'],
+                data: [id[1],id[3],id[2]]
+            }]
+            },
+            options: {
+              
+            plugins: {
+                legend: {
+                    display: true,
+                    position:'bottom',
+                }
+           }
+
+            }
+        });
+                
+        },
+        say: function () {
+            this.NumberMonth= this.tableauMois[5];
+            this.array = this.message.split(/\n/);
+            this.array.forEach(element => {
+            var item=element.split(/\t/);
+                if(item[3]!=null) {this.person= new Person(item[1],item[3],item[4],item[5],item[6]);}
+                item[3]=null;
+                this.result.push( this.person);
+                });
+                this.result.pop();
+                this.result= this.result.filter(item => {
+                return !item.EndDate=='';
+            });
+            this.calculDate();
+        },  
+        convertToDate: function(dateString) {
+            //  Convert a "dd/MM/yyyy" string into a Date object
+            let  a=dateString.split("  ")
+            let d = a[0].split("/");
+            let dat = new Date(d[2] + '/' + d[1] + '/' + d[0]);
+            return dat;     
+         }
+         
+        }, 
+    computed:{
+        drowChart(){
+            this.resultMois.forEach(element => {
+                // console.log(element);
+                this.chart(element);
+             });
+        },
+        
+    },
+})
+
+</script>
+</html>
